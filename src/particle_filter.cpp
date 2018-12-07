@@ -34,7 +34,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   normal_distribution<double> dist_y(y, std[1]);
   normal_distribution<double> dist_theta(theta, std[2]);
 
-  num_particles = 100; // how to determine??
+  num_particles = 10; // how to determine??
   for (int index = 0; index < num_particles; ++index) {
     Particle p;
     p.id = index;
@@ -45,6 +45,8 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 
     particles.push_back(p);
 
+    weights.push_back(1.0);
+
     cout << "Particle init" << index << " " << p.x << " " << p.y << " " << p.theta << endl;
   }
 
@@ -53,7 +55,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 
 void ParticleFilter::prediction(double delta_t, double std_pos[], double velocity, double yaw_rate) {
   // Add measurements to each particle and add random Gaussian noise.
-  // NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
+  // NOTE: When adding no
   //  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
   //  http://www.cplusplus.com/reference/random/default_random_engine/
   default_random_engine gen;
@@ -190,7 +192,6 @@ void ParticleFilter::resample() {
   // normalize
   std::vector<int> weights;
   for (auto particle: particles) {
-    double divby = particle.weight / sum_weights;
     weights.push_back(particle.weight / sum_weights * 1000);
   }
 
