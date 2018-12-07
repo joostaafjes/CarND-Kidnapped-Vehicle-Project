@@ -114,40 +114,19 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     // match observations relative to this particle with existing landmarks (in Map)
     // transformation needed?? vehicle to map
     // use method dataAssociation
-//    struct Position {
-//      long double x;
-//      long double y;
-//    };
-    // OBS1
-//    std::list<Position> observations = {
-//        {2.0f, 2.0f},
-//        {3.0f, -2.0f},
-//        {0.0f, -4.0f},
-//    };
-//    std::list<Position> landmarks = {
-//        {5.0f, 3.0f},
-//        {2.0f, 1.0f},
-//        {4.0f, 7.0f},
-//    };
 
     long double sum_mvgp = 1.0f;
 
     std::vector<LandmarkObs> observation_map_coord;
 
+    std::vector<int> associations;
+    std::vector<double> sense_x, sense_y;
+
     // map observations from car to map coordinate systems for this particle, new structure
     for (auto observation: observations) {
-
-//      Position landmark = landmarks.front();
-//      landmarks.pop_front();
-
-//      long double x_par_of_car = 4.0f;
-//      long double y_par_of_car = 5.0f;
-
-//      long double theta_car = -0.5f * M_PI; // counterwise
-
       // observation in vehicle coordinate system transform to map coordinate system
-      long double x_map = particle.x + cos(particle.theta) * observation.x - sin(particle.theta) * observation.y;
-      long double y_map = particle.y + sin(particle.theta) * observation.x + cos(particle.theta) * observation.y;
+      double x_map = particle.x + cos(particle.theta) * observation.x - sin(particle.theta) * observation.y;
+      double y_map = particle.y + sin(particle.theta) * observation.x + cos(particle.theta) * observation.y;
 
 //      std::cout << "x_map: " << x_map << std::endl;
 //      std::cout << "y_map: " << y_map << std::endl;
@@ -159,11 +138,17 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       // match each observation to a map landmark (see dataAssociation above) -> set the id in the observation
       dataAssociation(map_landmarks, landmarkObs);
       observation_map_coord.push_back(landmarkObs);
+
+      // preprare association for visualisation
+      associations.push_back(landmarkObs.id);
+      sense_x.push_back(x_map);
+      sense_y.push_back(y_map);
     }
 
+    // associate particle with observations for visualisation
+    particle = SetAssociations(particle, associations, sense_x, sense_y);
 
 //      std::cout << "x_map nearest landmark: " << landmark.x << std::endl;
-
 //      std::cout << "y_map nearest landmark: " << landmark.y << std::endl;
 
     for (auto observation: observation_map_coord) {
@@ -223,7 +208,7 @@ void ParticleFilter::resample() {
   particles = updated_particles;
 }
 
-Particle ParticleFilter::SetAssociations(Particle &particle, const std::vector<int> &associations,
+Particle ParticleFilter::SetAssociations(Particle& particle, const std::vector<int> &associations,
                                          const std::vector<double> &sense_x, const std::vector<double> &sense_y) {
   //particle: the particle to assign each listed association, and association's (x,y) world coordinates mapping to
   // associations: The landmark id that goes along with each listed association
@@ -233,6 +218,8 @@ Particle ParticleFilter::SetAssociations(Particle &particle, const std::vector<i
   particle.associations = associations;
   particle.sense_x = sense_x;
   particle.sense_y = sense_y;
+
+  return particle;
 }
 
 string ParticleFilter::getAssociations(Particle best) {
