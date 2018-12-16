@@ -96,7 +96,7 @@ void ParticleFilter::dataAssociation(const Map &map_landmarks, LandmarkObs &obse
     }
   }
   // assign best match to observation
-  observation.id = best_match_id - 1;
+  observation.id = best_match_id;
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
@@ -157,8 +157,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       // calculate weight using Multivariate Gaussian probability density
       long double mvgp = exp(
           -(
-              pow(observation.x - map_landmarks.landmark_list[observation.id].x_f, 2) / (2 * pow(std_landmark[0], 2))
-                  + pow((observation.y - map_landmarks.landmark_list[observation.id].y_f), 2)
+              pow(observation.x - map_landmarks.landmark_list[observation.id - 1].x_f, 2) / (2 * pow(std_landmark[0], 2))
+                  + pow((observation.y - map_landmarks.landmark_list[observation.id - 1].y_f), 2)
                       / (2 * pow(std_landmark[1], 2))
           )) /
           (2 * M_PI * std_landmark[0] * std_landmark[1]);
